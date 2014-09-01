@@ -258,13 +258,26 @@
         cursor: attribute.value.start
       };
     },
-    UNQUOTED_ATTR_VALUE: function(parser) {
-      var pos = parser.stream.pos;
+    UNQUOTED_ATTR_VALUE: function(parser, nameTok) {
+      var currentNode = parser.domBuilder.currentNode,
+        openTag = this._combine({
+          name: currentNode.nodeName.toLowerCase()
+        }, currentNode.parseInfo.openTag),
+        attribute = {
+          name: {
+            value: nameTok.value,
+            start: nameTok.interval.start,
+            end: nameTok.interval.end
+          }
+        },
+        pos = parser.stream.pos;
       if (!parser.stream.end()) {
         pos = parser.stream.makeToken().interval.start;
       }
       return {
         start: pos,
+        openTag: openTag,
+        attribute: attribute,
         cursor: pos
       };
     },
@@ -1500,10 +1513,29 @@
     // the stream to be right after the end of the closing tag's tag
     // name.
     _parseEndCloseTag: function() {
+      var pos, st, nextOpen, nextClose;
       this.stream.eatSpace();
       if (this.stream.next() != '>') {
         if(this.containsAttribute(this.stream)) {
-          throw new ParseError("ATTRIBUTE_IN_CLOSING_TAG", this);
+          // Find the positions of the next < and the next >
+          pos = this.stream.pos;
+          this.stream.rewind(2);
+          st = this.stream.pos;
+          this.stream.eatWhile(/[^\<]/);
+          nextOpen = this.stream.pos;
+          this.stream.pos = st;
+          this.stream.eatWhile(/[^\>]/);
+          nextClose = this.stream.pos;
+          this.stream.pos = pos;
+
+          // If the next tag opening is before the next tag closing, this
+          // tag has been left open. Otherwise, there's an attribute in the
+          // closing tag
+          if (nextOpen < nextClose) {
+            throw new ParseError("UNTERMINATED_CLOSE_TAG", this);
+          } else {
+            throw new ParseError("ATTRIBUTE_IN_CLOSING_TAG", this);
+          }
         } else {
           throw new ParseError("UNTERMINATED_CLOSE_TAG", this);
         }
@@ -1638,7 +1670,7 @@
         this.stream.makeToken();
         var quoteType = this.stream.next();
         if (quoteType !== '"' && quoteType !== "'") {
-          throw new ParseError("UNQUOTED_ATTR_VALUE", this);
+          throw new ParseError("UNQUOTED_ATTR_VALUE", this, nameTok);
         }
         if (quoteType === '"') {
           this.stream.eatWhile(/[^"]/);
