@@ -40,15 +40,15 @@ function assertParseIntervals(html, node, name, map) {
 // parsed document.
 function parseWithoutErrors(html) {
   var result = Slowparse.HTML(document, html);
-  
+
   ok(result.document, "document is returned");
   equal(result.error, null, "no errors are reported");
-  
+
   return result.document;
 }
 
 // Test many snippets of valid HTML, passing the HTML and its document
-// to a callback function that does the actual testing. Useful for 
+// to a callback function that does the actual testing. Useful for
 // testing that many different inputs result in the same output.
 function testManySnippets(name, htmlStrings, cb) {
   htmlStrings.forEach(function(html) {
@@ -62,7 +62,7 @@ function testManySnippets(name, htmlStrings, cb) {
 function testStyleSheet(name, cssList, cb) {
   if (typeof(cssList) == "string")
     cssList = [cssList];
-  
+
   cssList.forEach(function(css) {
     test(name + ": " + JSON.stringify(css), function() {
       var html = '<style>' + css + '</style>';

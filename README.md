@@ -30,4 +30,4 @@ For more information, see:
   [spec/errors.jquery.js]: http://mozilla.github.com/slowparse/?errors.jquery.js
   [test suite]: http://mozilla.github.com/slowparse/test/
   [learning]: http://www.toolness.com/wp/2012/04/learning-and-grammatical-forgiveness/
-  
+

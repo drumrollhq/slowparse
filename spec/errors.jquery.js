@@ -11,13 +11,13 @@
 
 (function(jQuery) {
   var $ = jQuery;
-  
+
   // ## jQuery Extensions
-  
+
   jQuery.extend({
     // **jQuery.errorTemplates** is a selection that contains all our error
     // message templates.
-    
+
     errorTemplates: $(),
     // **jQuery.loadErrors(*basePath*, *names*, *cb*)** loads a set of error
     // message templates.
@@ -26,7 +26,7 @@
     //   template HTML files.
     //
     // * *names* is an array of template files to load. For each `name`
-    //   in this array, the file `errors.name.html` will be loaded from 
+    //   in this array, the file `errors.name.html` will be loaded from
     //   *basePath*.
     //
     // * *cb* is a function that will be called once all the templates
@@ -48,7 +48,7 @@
       });
     }
   });
-  
+
   jQuery.fn.extend({
     // **jQuery.fn.errorHighlightInterval()** returns an object
     // containing `{start, end}` keys that describe the integral start and
@@ -60,7 +60,7 @@
       var end = interval[1] ? parseInt(interval[1]) : undefined;
       return {start: start, end: end};
     },
-    
+
     // **jQuery.fn.eachErrorHighlight(*cb*)** calls the given callback on
     // every element with a `data-highlight` attribute in the current
     // selection. The callback is passed `(start, end, i)` arguments
@@ -73,7 +73,7 @@
       });
       return this;
     },
-    
+
     // **jQuery.fn.fillError(*error* [, *templates*])** fills the current selection with the
     // friendly error message for the given error object. For more
     // information on error objects, see the [error specification][spec].

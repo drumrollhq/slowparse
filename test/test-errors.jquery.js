@@ -29,7 +29,7 @@ test("$.fn.errorHighlightInterval() works", function() {
 
 test("$.fn.eachErrorHighlight() works", function() {
   var args = [];
-  var div = $('<div><div data-highlight="1,2"></div>' + 
+  var div = $('<div><div data-highlight="1,2"></div>' +
                '<em data-highlight="3"></em></div>');
   div.eachErrorHighlight(function(start, end, i) {
     args.push({

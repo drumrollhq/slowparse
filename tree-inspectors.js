@@ -33,7 +33,7 @@ var TreeInspectors = (function() {
           eachAttr(node.childNodes[i], fn);
     }
   };
-  
+
   var TreeInspectors = {
     // We export our utility functions in case any other scripts want
     // to extend the `TreeInspectors` object with more inspectors.
@@ -46,12 +46,12 @@ var TreeInspectors = (function() {
     // use of JavaScript.
     findJS: function(doc) {
       var js = [];
-      
+
       // We want to find `script` elements.
       utils.each(doc, "script", function(script) {
         js.push({type: "SCRIPT_ELEMENT", node: script});
       });
-      
+
       utils.eachAttr(doc, function(attr) {
         // If the attribute name begins with `on`, we can safely assume
         // it's an event handler attribute. We can change this in the
@@ -59,7 +59,7 @@ var TreeInspectors = (function() {
         // start with `on`.
         if (attr.nodeName.match(/^on/i))
           js.push({type: "EVENT_HANDLER_ATTR", node: attr});
-          
+
         // If the attribute value starts with `javascript:`, regardless
         // of the attribute name, raise an error. We can change this in
         // the future if we only want to make this check on specific
@@ -67,7 +67,7 @@ var TreeInspectors = (function() {
         if (attr.nodeValue.match(/^javascript:/i))
           js.push({type: "JAVASCRIPT_URL", node: attr});
       });
-      
+
       return js;
     },
     // This is a Slowparse error detector that returns an error object
@@ -81,7 +81,7 @@ var TreeInspectors = (function() {
       return error;
     }
   };
-  
+
   if (typeof(define) == "function") {
     define(function() { return TreeInspectors; });
   } else

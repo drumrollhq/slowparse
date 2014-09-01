@@ -11,7 +11,7 @@ jQuery.fn.extend({
     function sourceText(interval) {
       return source.text().slice(interval.start, interval.end);
     }
-    
+
     var newSource = $("<div></div>"),
         slices = [],
         i = 0;
@@ -90,7 +90,7 @@ function runTests(module, test, ok, deepEqual, cb) {
       });
     });
   }
-  
+
   var interval = setInterval(function() {
     if ($("html").hasClass("done-loading")) {
       ok(true, "<html> has done-loading class");
@@ -108,7 +108,7 @@ $(window).ready(function() {
 
       if (badHtmlElement.length == 0)
         badHtmlElement = $('div.bad-html', this);
-      
+
       var badHtml = badHtmlElement.text().trim();
       var t = $("#templates .report").clone();
       var js = $('div.js', this).text().trim();
@@ -119,7 +119,7 @@ $(window).ready(function() {
         expectedError = JSON.parse(expect);
         expectedErrorType = expectedError.type;
       }
-      
+
       if (!js)
         js = $(".js > div:first-child", t).text();
       js = js.replace("{{HTML}}", JSON.stringify(badHtml));
@@ -134,7 +134,7 @@ $(window).ready(function() {
         badHtmlElement.replaceWith(t);
         return;
       }
-      
+
       expectedErrorType = expectedErrorType || error.type;
       $("h2", t).text(expectedErrorType).attr("id", expectedErrorType);
 
@@ -147,7 +147,7 @@ $(window).ready(function() {
       }
       errMsg.showHighlights($(".html", t));
       badHtmlElement.replaceWith(t);
-      
+
       // Set the result last, as this effectively tells the test
       // suite that this test didn't throw an exception.
       $(".result", t).text(JSON.stringify(error, null, "  "));

@@ -9,12 +9,12 @@ test("works on script-less HTML", function() {
 
 (function() {
   module("TreeInspectors.findJS()");
-  
+
   function findJS(html) {
     var doc = Slowparse.HTML(document, html).document;
     return TreeInspectors.findJS(doc);
   }
-  
+
   test("works on script-less HTML", function() {
     deepEqual(findJS('<p class="hi">hello</p><!-- hi -->'), []);
   });
@@ -28,7 +28,7 @@ test("works on script-less HTML", function() {
       'parseInfo.openTag': '<script>'
     });
   });
-  
+
   test("EVENT_HANDLER_ATTR is reported", function() {
     var html = '<p onclick="alert(\'yo\');">hi</p>';
     var js = findJS(html);
@@ -39,7 +39,7 @@ test("works on script-less HTML", function() {
       'parseInfo.value': '"alert(\'yo\');"'
     });
   });
-  
+
   test("JAVASCRIPT_URL is reported", function() {
     var html = '<a href="javascript:alert(\'yo\');">hi</a>';
     var js = findJS(html);
