@@ -1756,6 +1756,10 @@
     replaceEntityRefs: replaceEntityRefs,
     Stream: Stream,
 
+    // E.A.K. needs access to the HTMLParser to add support for its
+    // custom elements
+    HTMLParser: HTMLParser,
+
     // `Slowparse.HTML()` is the primary function we export. Given
     // a DOM document object (or a DOMBuilder instance) and a string
     // of HTML, we return an object with the following keys:
