@@ -89,7 +89,7 @@
       var template = (templates || $.errorTemplates).filter(selector);
       if (template.length == 0)
         throw new Error("Error template not found for " + error.type);
-      this.html(_.template(template.html(), error, mustacheSettings)).show();
+      this.html(_.template(template.html(), mustacheSettings)(error)).show();
       return this;
     }
   });
