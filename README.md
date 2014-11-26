@@ -1,3 +1,5 @@
+A version of slowparse adapted for use with E.A.K.
+
 Slowparse is an experimental JavaScript-based HTML parser for Mozilla Webmaking initiatives.
 
 Until now, most of Mozilla's Webmaking experiments that involve writing HTML ([lovebomb.me][], [Storything][], [X-Ray Goggles][], etc) have used `.innerHTML` to parse HTML into a DOM. However, this has a number of disadvantages:
