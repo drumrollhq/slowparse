@@ -557,7 +557,7 @@ module.exports = (function(){
         this.stream.makeToken();
         var quoteType = this.stream.next();
         if (quoteType !== '"' && quoteType !== "'") {
-          throw new ParseError("UNQUOTED_ATTR_VALUE", this);
+          throw new ParseError("UNQUOTED_ATTR_VALUE", this, nameTok);
         }
         if (quoteType === '"') {
           this.stream.eatWhile(/[^"]/);

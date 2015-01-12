@@ -118,13 +118,26 @@ module.exports = (function() {
         cursor: attribute.value.start
       };
     },
-    UNQUOTED_ATTR_VALUE: function(parser) {
-      var pos = parser.stream.pos;
+    UNQUOTED_ATTR_VALUE: function(parser, nameTok) {
+      var currentNode = parser.domBuilder.currentNode,
+        openTag = this._combine({
+          name: currentNode.nodeName.toLowerCase()
+        }, currentNode.parseInfo.openTag),
+        attribute = {
+          name: {
+            value: nameTok.value,
+            start: nameTok.interval.start,
+            end: nameTok.interval.end
+          }
+        },
+        pos = parser.stream.pos;
       if (!parser.stream.end()) {
         pos = parser.stream.makeToken().interval.start;
       }
       return {
         start: pos,
+        openTag: openTag,
+        attribute: attribute,
         cursor: pos
       };
     },
