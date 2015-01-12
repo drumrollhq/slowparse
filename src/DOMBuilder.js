@@ -33,7 +33,9 @@ module.exports = (function(){
     // This method pops the current element off the DOM builder's stack,
     // making its parent element the currently active element.
     popElement: function() {
-      this.currentNode = this.currentNode.parentNode;
+      if (this.currentNode.parentNode) {
+        this.currentNode = this.currentNode.parentNode;
+      }
     },
     // record the cursor position for a context change (text/html/css/script)
     pushContext: function(context, position) {
