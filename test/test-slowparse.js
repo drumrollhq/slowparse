@@ -264,8 +264,6 @@ module.exports = function(Slowparse, window, document, validators) {
     equal(error.type, "INVALID_TAG_NAME");
   });
 
-  /*
-  // Commented off because of a "bug" in jsdom, see https://github.com/tmpvar/jsdom/issues/706
   test("parsing of HTML with void elements", function(){
     testManySnippets("parsing of HTML with void elements", [
       '<br>',
@@ -274,7 +272,6 @@ module.exports = function(Slowparse, window, document, validators) {
       equal(documentFragmentHTML(doc), html);
     });
   });
-  */
 
   test("parsing of text content w/ newlines", function(){
     testManySnippets("parsing of text content w/ newlines", [
@@ -618,16 +615,28 @@ module.exports = function(Slowparse, window, document, validators) {
     equal(result.error, expected, "bad omission error for <p>");
   });
 
+  test("testing CSS 'content' property values with semi-colons", function() {
+    var html = "<style>div:before { content: '&lt;' attr(test) 'test'; content: \"&lt;\"; }</style>";
+    var result = parse(html);
+    ok(!result.error, "semi-colons accepted");
+  });
+
+  test("testing CSS 'content' property values with semi-colons inside nested quotes", function() {
+    var html = "<style>div:before { content: 'let\\'s try \";\", eh?'; }</style>";
+    var result = parse(html);
+    ok(!result.error, "semi-colons accepted");
+  });
+
   test("@keyframes css block", function() {
     var html = "<style>@keyframes { 0% { opacity: 0; } 100% { opacity: 1.0; } } .test { opacity: 0; }</style>";
     var result = parse(html);
-    ok(!result.error, "@keyframes accepted</p>");
+    ok(!result.error, "@keyframes accepted");
   });
 
   test("@keyframes css block with named frame", function() {
     var html = "<style>@keyframes animation1 { 0% { left: 260px; top: -10%; } 100% { left: 260px; top: 100%; } }</style>";
     var result = parse(html);
-    ok(!result.error, "@keyframes accepted</p>");
+    ok(!result.error, "@keyframes accepted");
   });
 
   test("@keyframes css block with typo (@keyfarmes). pass = not accepted", function() {
@@ -648,31 +657,49 @@ module.exports = function(Slowparse, window, document, validators) {
   test("@-moz-keyframes css block", function() {
     var html = "<style>@-moz-keyframes { 0% { opacity: 0; } 100% { opacity: 1.0; } } .test { opacity: 0; }</style>";
     var result = parse(html);
-    ok(!result.error, "@-*-keyframes accepted</p>");
+    ok(!result.error, "@-*-keyframes accepted");
   });
 
   test("@-webkit-keyframes css block", function() {
     var html = "<style>@-webkit-keyframes { 0% { opacity: 0; } 100% { opacity: 1.0; } } .test { opacity: 0; }</style>";
     var result = parse(html);
-    ok(!result.error, "@-*-keyframes accepted</p>");
+    ok(!result.error, "@-*-keyframes accepted");
+  });
+
+  test("@keyframes css block with leading block comment", function() {
+    var html = "<style>/*\n  keyframe test\n*/\n@keyframes { 0% { opacity: 0; } 100% { opacity: 1.0; } } .test { opacity: 0; }</style>";
+    var result = parse(html);
+    ok(!result.error, "@keyframes accepted");
+  });
+
+  test("@keyframes css block with trailing block comment", function() {
+    var html = "<style>\n@keyframes { 0% { opacity: 0; } 100% { opacity: 1.0; } } .test { opacity: 0; }\n/*\n  keyframe test\n*/\n</style>";
+    var result = parse(html);
+    ok(!result.error, "@keyframes accepted");
+  });
+
+  test("@keyframes css block with leading and trailing block comment", function() {
+    var html = "<style>/*\n  keyframe test\n*/\n@keyframes { 0% { opacity: 0; } 100% { opacity: 1.0; } } .test { opacity: 0; }\n/*\n  keyframe test\n*/\n</style>";
+    var result = parse(html);
+    ok(!result.error, "@keyframes accepted");
   });
 
   test("@media rule", function() {
     var html = "<style>@media (max-width: 100px) { .class { background: white; } }</style>";
     var result = parse(html);
-    ok(!result.error, "@media accepted</p>");
+    ok(!result.error, "@media accepted");
   });
 
   test("@media rule (complex)", function() {
     var html = "<style>@media (min-width: 700px), handheld and (orientation: landscape) { .class { background: white; } }</style>";
     var result = parse(html);
-    ok(!result.error, "@media accepted</p>");
+    ok(!result.error, "@media accepted");
   });
 
   test("@font-face rule", function() {
     var html = "<style>@font-face { font-family: 'snickerdoodle'; } .test { opacity: 0; }</style>";
     var result = parse(html);
-    ok(!result.error, "@font-face accepted</p>");
+    ok(!result.error, "@font-face accepted");
   });
 
   test("@font-face rule with typo (@font-faec). pass = not accepted", function() {
@@ -753,6 +780,20 @@ module.exports = function(Slowparse, window, document, validators) {
         }
       },
       cursor: 11
+    });
+  });
+
+  test("Rogue \"value\" entries inside the opening tag should be flagged as bad", function () {
+    var html = '<body><img src="https://example.org/test.png" alt="test image" width "207"></body>';
+    var result = parse(html);
+    equal(result.error, {
+      type: 'UNBOUND_ATTRIBUTE_VALUE',
+      value: '"207"',
+      interval: {
+        start: 69,
+        end: 74
+      },
+      cursor: 69
     });
   });
 
