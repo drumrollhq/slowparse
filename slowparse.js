@@ -1023,10 +1023,30 @@ module.exports = (function(){
     // the stream to be right after the end of the closing tag's tag
     // name.
     _parseEndCloseTag: function() {
+      var pos, st, nextOpen, nextClose;
       this.stream.eatSpace();
       if (this.stream.next() != '>') {
         if(this.containsAttribute(this.stream)) {
-          throw new ParseError("ATTRIBUTE_IN_CLOSING_TAG", this);
+          // Find the positions of the next < and the next >
+          // TODO: take in to account <> that are not part of a tag
+          pos = this.stream.pos;
+          this.stream.rewind(2);
+          st = this.stream.pos;
+          this.stream.eatWhile(/[^\<]/);
+          nextOpen = this.stream.pos;
+          this.stream.pos = st;
+          this.stream.eatWhile(/[^\>]/);
+          nextClose = this.stream.pos;
+          this.stream.pos = pos;
+
+          // If the next tag opening is before the next tag closing, this
+          // tag has been left open. Otherwise, there's an attribute in the
+          // closing tag.
+          if (nextOpen < nextClose) {
+            throw new ParseError("UNTERMINATED_CLOSE_TAG", this);
+          } else {
+            throw new ParseError("ATTRIBUTE_IN_CLOSING_TAG", this);
+          }
         } else {
           throw new ParseError("UNTERMINATED_CLOSE_TAG", this);
         }
