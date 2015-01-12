@@ -539,6 +539,12 @@ module.exports = function(Slowparse, window, document, validators) {
     equal(error.closeTag.end, html.length);
   });
 
+  test("UNTERMINATED_CLOSE_TAG works when followed by an open tag", function() {
+    var html = "<div>Foo</div <p>Bar</p>";
+    var error = Slowparse.HTML(document, html).error;
+    equal(error.type, "UNTERMINATED_CLOSE_TAG", "error.type should be UNTERMINATED_CLOSE_TAG, but was " + error.type);
+  });
+
   test("ATTRIBUTE_IN_CLOSING_TAG works when attribute is included in closing tag", function() {
     var html = "<a href=\"http://www.foo.com/\">Foo</a href>";
     var error = Slowparse.HTML(document, html).error;
