@@ -84,7 +84,7 @@
           disallowActiveAttributes = (typeof options.disallowActiveAttributes === "undefined") ? false : options.disallowActiveAttributes;
 
       domBuilder = new DOMBuilder(document, disallowActiveAttributes);
-      parser = new HTMLParser(stream, domBuilder);
+      parser = new HTMLParser(stream, domBuilder, options);
 
       try {
         var _ = parser.parse();

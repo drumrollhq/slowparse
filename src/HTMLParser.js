@@ -74,7 +74,8 @@ module.exports = (function(){
     return false;
   }
 
-  function HTMLParser(stream, domBuilder) {
+  function HTMLParser(stream, domBuilder, options) {
+    this.options = options || {};
     this.warnings = [];
     this.stream = stream;
     this.domBuilder = domBuilder;
@@ -179,6 +180,25 @@ module.exports = (function(){
 
     webComponentElements: ["template", "shadow", "content"],
 
+    // Is this attribute part of a parser command?
+    _checkParserCommand: function(name, value) {
+      if (this.domBuilder.currentNode.nodeName === 'META' &&
+          name.toLowerCase() === 'name' &&
+          value.indexOf('slowparse:') === 0) this.parserCommand(value);
+    },
+
+    // Parser commands, triggered by <meta name="slowparse:..."> tags
+    parserCommand: function(command) {
+      command = command.replace(/^slowparse:/, '');
+      switch (command) {
+        case 'disableOmittableCloseTags':
+          this.options.disableOmittableCloseTags = true;
+          break;
+        default:
+          console.log('Unknown slowparse command: ' + command);
+      }
+    },
+
     // This is a helper function to determine whether a given string
     // is a custom HTML element as per Custom Elements spec
     // (see http://www.w3.org/TR/2013/WD-custom-elements-20130514/#terminology).
@@ -210,12 +230,14 @@ module.exports = (function(){
     // This is a helper function to determine whether a given string
     // is a HTML element tag which can optional omit its close tag.
     _knownOmittableCloseTagHtmlElement: function(tagName) {
+      if (this.options.disableOmittableCloseTags) return false;
       return this.omittableCloseTagHtmlElements.indexOf(tagName) > -1;
     },
 
     // This is a helper function to determine whether a given string
     // is in the list of ommittableCloseTags which enable an active tag omit its close tag.
     _knownOmittableCloseTags: function(activeTagName, foundTagName) {
+      if (this.options.disableOmittableCloseTags) return false;
       return this.omittableCloseTags[activeTagName].indexOf(foundTagName) > -1;
     },
 
@@ -600,6 +622,7 @@ module.exports = (function(){
           name: nameTok.interval,
           value: valueTok.interval
         });
+        this._checkParserCommand(nameTok.value, unquotedValue);
       } else {
         this.stream.makeToken();
         this.domBuilder.attribute(nameTok.value, '', {
