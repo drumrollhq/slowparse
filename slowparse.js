@@ -2002,7 +2002,7 @@ module.exports = {
 
       if (error) {
         domBuilder.currentNode.error = error;
-        if (domBuilder.currentNode.setAttribute) domBuilder.currentNode.setAttribute('data-has-error', true);
+        if (domBuilder.currentNode.setAttribute) domBuilder.currentNode.setAttribute('data-has-slowparse-error', true);
       }
 
       return {
