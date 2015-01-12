@@ -407,10 +407,29 @@ module.exports = (function(){
     // the stream to be right after the end of the closing tag's tag
     // name.
     _parseEndCloseTag: function() {
+      var initialPos, start, nextOpenPos, nextClosePos;
       this.stream.eatSpace();
       if (this.stream.next() != '>') {
         if(this.containsAttribute(this.stream)) {
-          throw new ParseError("ATTRIBUTE_IN_CLOSING_TAG", this);
+          // Find the position of the next < and >
+          initialPos = this.stream.pos;
+          this.stream.rewind(2);
+          start = this.stream.pos;
+          this.stream.eatWhile(/[^\<]/);
+          nextOpenPos = this.stream.pos;
+          this.stream.pos = start;
+          this.stream.eatWhile(/[^\>]/);
+          nextClosePos = this.stream.pos;
+          this.stream.pos = initialPos;
+
+          // If the next tag opening is before the next tag closing, this
+          // tag has been left open. Otherwise, there's an attribute in the
+          // closing tag.
+          if (nextOpenPos < nextClosePos) {
+            throw new ParseError("UNTERMINATED_CLOSE_TAG", this);
+          } else {
+            throw new ParseError("ATTRIBUTE_IN_CLOSING_TAG", this);
+          }
         } else {
           throw new ParseError("UNTERMINATED_CLOSE_TAG", this);
         }
@@ -557,7 +576,7 @@ module.exports = (function(){
         this.stream.makeToken();
         var quoteType = this.stream.next();
         if (quoteType !== '"' && quoteType !== "'") {
-          throw new ParseError("UNQUOTED_ATTR_VALUE", this);
+          throw new ParseError("UNQUOTED_ATTR_VALUE", this, nameTok);
         }
         if (quoteType === '"') {
           this.stream.eatWhile(/[^"]/);

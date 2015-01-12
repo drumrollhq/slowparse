@@ -573,7 +573,9 @@ module.exports = (function(){
     // This method pops the current element off the DOM builder's stack,
     // making its parent element the currently active element.
     popElement: function() {
-      this.currentNode = this.currentNode.parentNode;
+      if (this.currentNode.parentNode) {
+        this.currentNode = this.currentNode.parentNode;
+      }
     },
     // record the cursor position for a context change (text/html/css/script)
     pushContext: function(context, position) {
@@ -1023,10 +1025,29 @@ module.exports = (function(){
     // the stream to be right after the end of the closing tag's tag
     // name.
     _parseEndCloseTag: function() {
+      var initialPos, start, nextOpenPos, nextClosePos;
       this.stream.eatSpace();
       if (this.stream.next() != '>') {
         if(this.containsAttribute(this.stream)) {
-          throw new ParseError("ATTRIBUTE_IN_CLOSING_TAG", this);
+          // Find the position of the next < and >
+          initialPos = this.stream.pos;
+          this.stream.rewind(2);
+          start = this.stream.pos;
+          this.stream.eatWhile(/[^\<]/);
+          nextOpenPos = this.stream.pos;
+          this.stream.pos = start;
+          this.stream.eatWhile(/[^\>]/);
+          nextClosePos = this.stream.pos;
+          this.stream.pos = initialPos;
+
+          // If the next tag opening is before the next tag closing, this
+          // tag has been left open. Otherwise, there's an attribute in the
+          // closing tag.
+          if (nextOpenPos < nextClosePos) {
+            throw new ParseError("UNTERMINATED_CLOSE_TAG", this);
+          } else {
+            throw new ParseError("ATTRIBUTE_IN_CLOSING_TAG", this);
+          }
         } else {
           throw new ParseError("UNTERMINATED_CLOSE_TAG", this);
         }
@@ -1173,7 +1194,7 @@ module.exports = (function(){
         this.stream.makeToken();
         var quoteType = this.stream.next();
         if (quoteType !== '"' && quoteType !== "'") {
-          throw new ParseError("UNQUOTED_ATTR_VALUE", this);
+          throw new ParseError("UNQUOTED_ATTR_VALUE", this, nameTok);
         }
         if (quoteType === '"') {
           this.stream.eatWhile(/[^"]/);
@@ -1210,6 +1231,7 @@ module.exports = (function(){
 
   return HTMLParser;
 }());
+
 },{"./CSSParser":1,"./ParseError":4,"./checkMixedContent":7}],4:[function(require,module,exports){
 // ### Errors
 //
@@ -1373,13 +1395,26 @@ module.exports = (function() {
         cursor: attribute.value.start
       };
     },
-    UNQUOTED_ATTR_VALUE: function(parser) {
-      var pos = parser.stream.pos;
+    UNQUOTED_ATTR_VALUE: function(parser, nameTok) {
+      var currentNode = parser.domBuilder.currentNode,
+        openTag = this._combine({
+          name: currentNode.nodeName.toLowerCase()
+        }, currentNode.parseInfo.openTag),
+        attribute = {
+          name: {
+            value: nameTok.value,
+            start: nameTok.interval.start,
+            end: nameTok.interval.end
+          }
+        },
+        pos = parser.stream.pos;
       if (!parser.stream.end()) {
         pos = parser.stream.makeToken().interval.start;
       }
       return {
         start: pos,
+        openTag: openTag,
+        attribute: attribute,
         cursor: pos
       };
     },
