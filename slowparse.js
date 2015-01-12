@@ -2000,6 +2000,11 @@ module.exports = {
           error = detector(html, domBuilder.fragment) || null;
       });
 
+      if (error) {
+        domBuilder.currentNode.error = error;
+        if (domBuilder.currentNode.setAttribute) domBuilder.currentNode.setAttribute('data-has-error', true);
+      }
+
       return {
         document: domBuilder.fragment,
         contexts: domBuilder.contexts,
