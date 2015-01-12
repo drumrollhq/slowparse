@@ -65,6 +65,7 @@ module.exports = function(Slowparse, window, document, validators) {
   test("UNQUOTED_ATTR_VALUE in <h2><span start=</h2>", function() {
     // https://github.com/mozilla/slowparse/issues/6
     var err = Slowparse.HTML(document, '<h2><span start=</h2>').error;
+    console.log(err);
     equal(err.type, "UNQUOTED_ATTR_VALUE");
   });
 
